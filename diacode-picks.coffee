@@ -88,7 +88,7 @@ editLink = (msg) ->
   return unless validateRoom(msg)
 
   editionRegex = /^!edit ([0-9]+) (title|description) (.*)$/i
-  matches = approvalRegex.exec(msg.message.text)
+  matches = editionRegex.exec(msg.message.text)
   linkId = matches[1]
 
   params = {}

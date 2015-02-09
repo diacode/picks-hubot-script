@@ -99,7 +99,7 @@ editLink = (msg) ->
   return unless validateConfiguration(msg)
   return unless validateRoom(msg)
 
-  editionRegex = /^!edit ([0-9]+) (title|description) (.*)$/i
+  editionRegex = /^!edit ([0-9]+) (title|description|desc) (.*)$/i
   matches = editionRegex.exec(msg.message.text)
   linkId = matches[1]
 

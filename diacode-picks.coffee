@@ -106,7 +106,9 @@ editLink = (msg) ->
   params = {}
   params.link = {}
 
-  params.link[matches[2]] = matches[3]
+  attributeToModify = if matches[2] == 'desc' then 'description' else matches[2]
+
+  params.link[attributeToModify] = matches[3]
 
   sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", params, 'put', ->
     msg.send "Link #{linkId} updated successfully"
@@ -130,5 +132,5 @@ approveLink = (msg) ->
 
 module.exports = (robot) ->
   robot.hear /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i, addLink
-  robot.hear /^!edit ([0-9]+) (title|description) (.*)$/i, editLink
+  robot.hear /^!edit ([0-9]+) (title|description|desc) (.*)$/i, editLink
   robot.hear /^!approve ([0-9]+)$/i, approveLink

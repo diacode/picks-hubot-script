@@ -1,6 +1,7 @@
 # Description
 #   This plugin will listen for links in the specified HUBOT_PICKS_ROOM. 
 #   Each link detected will be sent to HUBOT_PICKS_DISCOVER_URL where it'll be processed.
+#   The links can also be edited through the chat using !edit and !approve commands.
 #
 # Configuration:
 #   HUBOT_PICKS_DISCOVER_URL
@@ -10,6 +11,9 @@
 #
 # Commands:
 #   <link> - Will send a link to Diacode Picks API
+#   !edit <id_link> title <new_title> - Edit the title of a link
+#   !edit <id_link> description <new_description> - Edit the description of a link
+#   !approve <id_link> - Approve a link
 #
 # Author:
 #   hopsor
@@ -35,6 +39,25 @@ validateConfiguration = (msg) ->
 validateRoom = (msg) ->
   msg.envelope.room == watchedRoom
 
+# apiRequestCompleted: Method to process a response after sending an API request
+apiRequestCompleted = (err, res, body, msg, callback) ->
+  if err
+    msg.send "Encountered an error :( #{err}"
+    return
+
+  if res.statusCode < 200 || res.statusCode > 299
+    msg.send "Request didn't come back HTTP 200 :("
+    return
+
+  linkData = null
+
+  try
+    linkData = JSON.parse(body)
+    callback(linkData)
+  catch error
+    msg.send "Ran into an error parsing JSON response :("
+    return
+
 # sendApiRequest: Make api requests
 sendApiRequest = (msg, endPoint, params, method, callback) ->
   stringParams = JSON.stringify(params)
@@ -48,24 +71,11 @@ sendApiRequest = (msg, endPoint, params, method, callback) ->
       'auth-token': apiToken
     )
 
-  # TODO: Figure out how to call post, put, or anyother method depending on 'method' param
-  request.post(stringParams) (err, res, body) ->
-    if err
-      msg.send "Encountered an error :( #{err}"
-      return
-
-    if res.statusCode < 200 || res.statusCode > 299
-      msg.send "Request didn't come back HTTP 200 :("
-      return
-
-    linkData = null
-
-    try
-      linkData = JSON.parse(body)
-      callback(linkData)
-    catch error
-      msg.send "Ran into an error parsing JSON response :("
-      return
+  switch method
+    when 'post'
+      request.post(stringParams) (err, res, body) -> apiRequestCompleted(err, res, body, msg, callback)
+    when 'put'
+      request.put(stringParams) (err, res, body) -> apiRequestCompleted(err, res, body, msg, callback)    
 
 # ======================
 # Bot action definitions

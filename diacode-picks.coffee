@@ -13,6 +13,7 @@
 #   <link> - Will send a link to Diacode Picks API
 #   !edit <id_link> title <new_title> - Edit the title of a link
 #   !edit <id_link> description <new_description> - Edit the description of a link
+#   !edit <id_link> desc <new_description> - Edit the description of a link (alias)
 #   !approve <id_link> - Approve a link
 #
 # Author:
@@ -49,10 +50,10 @@ apiRequestCompleted = (err, res, body, msg, callback) ->
     msg.send "Request didn't come back HTTP 200 :("
     return
 
-  linkData = null
+  linkData = {}
 
   try
-    linkData = JSON.parse(body)
+    linkData = JSON.parse(body) if body != ''
     callback(linkData)
   catch error
     msg.send "Ran into an error parsing JSON response :("
@@ -89,8 +90,9 @@ addLink = (msg) ->
       url: msg.message.text
 
   sendApiRequest(msg, apiEndpoint, params, 'post', (linkData) ->
-    # TODO: Show link preview fetched by the api
     msg.send "Link processed and saved with ID #{linkData.link.id}"
+    msg.send "*Title*: #{linkData.link.title}"
+    msg.send "*Description*: #{linkData.link.description}"
   )    
 
 editLink = (msg) ->
@@ -106,7 +108,7 @@ editLink = (msg) ->
 
   params.link[matches[2]] = matches[3]
 
-  sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", params, 'put', (linkData) ->
+  sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", params, 'put', ->
     msg.send "Link #{linkId} updated successfully"
   )
 
@@ -122,7 +124,7 @@ approveLink = (msg) ->
     link:
       approved: true
 
-  sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", params, 'put', (linkData) ->
+  sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", params, 'put', ->
     msg.send "Link #{linkId} approved successfully"
   )
 

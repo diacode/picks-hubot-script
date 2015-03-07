@@ -138,8 +138,8 @@ deleteLink = (msg) ->
   return unless validateConfiguration(msg)
   return unless validateRoom(msg)
 
-  approvalRegex = /^!del(ete)? ([0-9]+)$/i
-  matches = approvalRegex.exec(msg.message.text)
+  removalRegex = /^!del(ete)? ([0-9]+)$/i
+  matches = removalRegex.exec(msg.message.text)
   linkId = matches[2]
 
   sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", {}, 'delete', ->

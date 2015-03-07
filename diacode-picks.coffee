@@ -91,7 +91,7 @@ addLink = (msg) ->
 
   params = 
     link:
-      url: msg.message.text
+      url: msg.message.text.replace("amp;", "")
 
   sendApiRequest(msg, apiEndpoint, params, 'post', (linkData) ->
     msg.send "Link processed and saved with ID #{linkData.link.id}"

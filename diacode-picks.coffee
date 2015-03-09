@@ -154,10 +154,11 @@ showBuffer = (msg) ->
 
   sendApiRequest(msg, "#{apiEndpoint}/buffer", {}, 'get', (data) ->
     linkList = ""
+    links = data.links
 
-    msg.send("There are #{data.length} links in the buffer")
+    msg.send("There are #{links.length} links in the buffer")
 
-    for link in data
+    for link in links
       linkList += "##{link.id} - #{link.title} #{link.url}\n"
 
     msg.send(linkList)

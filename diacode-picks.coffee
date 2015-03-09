@@ -152,7 +152,7 @@ showBuffer = (msg) ->
   return unless validateConfiguration(msg)
   return unless validateRoom(msg)
 
-  sendApiRequest(msg, "#{apiEndpoint}/buffer", {}, 'delete', (data) ->
+  sendApiRequest(msg, "#{apiEndpoint}/buffer", {}, 'get', (data) ->
     linkList = ""
 
     msg.send("There are #{data.length} links in the buffer")

@@ -71,8 +71,7 @@ sendApiRequest = (msg, endPoint, params, method, callback) ->
       'Accept': 'application/json'
       'Content-Length': stringParams.length
       'Content-Type': 'application/json'
-      'auth-email': userEmail
-      'auth-token': apiToken
+      'Authorization': "Token token=\"#{apiToken}\", email=\"#{userEmail}\""
     )
 
   switch method

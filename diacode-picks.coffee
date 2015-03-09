@@ -173,7 +173,7 @@ showLink = (msg) ->
   matches = showRegex.exec(msg.message.text)
   linkId = matches[1]
 
-  sendApiRequest(msg, "#{apiEndpoint}/links/#{linkId}", {}, 'get', (linkData) ->
+  sendApiRequest(msg, "#{apiEndpoint}/#{linkId}", {}, 'get', (linkData) ->
     linkInfo = """
     *Title*: #{linkData.link.title}
     *Description*: #{linkData.link.description}

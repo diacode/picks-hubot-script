@@ -17,6 +17,7 @@
 #   !approve <id_link> - Approve a link
 #   !delete <id_link> - Delete a link
 #   !del <id_link> - Delete a link (alias)
+#   !buffer - Will show all approved & unused links in the buffer
 #
 # Author:
 #   hopsor
@@ -75,6 +76,8 @@ sendApiRequest = (msg, endPoint, params, method, callback) ->
     )
 
   switch method
+    when 'get'
+      request.get(stringParams) (err, res, body) -> apiRequestCompleted(err, res, body, msg, callback)
     when 'post'
       request.post(stringParams) (err, res, body) -> apiRequestCompleted(err, res, body, msg, callback)
     when 'put'
@@ -146,8 +149,24 @@ deleteLink = (msg) ->
     msg.send "Link #{linkId} deleted successfully"
   )
 
+showBuffer = (msg) ->  
+  return unless validateConfiguration(msg)
+  return unless validateRoom(msg)
+
+  sendApiRequest(msg, "#{apiEndpoint}/buffer", {}, 'delete', (data) ->
+    linkList = ""
+
+    msg.send("There are #{data.length} links in the buffer")
+
+    for link in data
+      linkList += "##{link.id} - #{link.title} #{link.url}\n"
+
+    msg.send(linkList)
+  )
+
 module.exports = (robot) ->
   robot.hear /^(?:(?:https?):\/\/)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/[^\s]*)?$/i, addLink
   robot.hear /^!edit ([0-9]+) (title|description|desc) (.*)$/i, editLink
   robot.hear /^!approve ([0-9]+)$/i, approveLink
   robot.hear /^!del(ete)? ([0-9]+)$/i, deleteLink
+  robot.hear /^!buffer$/, showBuffer

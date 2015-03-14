@@ -18,7 +18,8 @@
 #   !delete <id_link> - Delete a link
 #   !del <id_link> - Delete a link (alias)
 #   !show <id_link> - Display all info stored of a link
-#   !buffer - Will show all approved & unused links in the buffer
+#   !approved - Will show all approved & unused links in the buffer
+#   !pending - Will show all pending & unused links in the buffer
 #
 # Author:
 #   hopsor
@@ -149,15 +150,31 @@ deleteLink = (msg) ->
     msg.send "Link #{linkId} deleted successfully"
   )
 
-showBuffer = (msg) ->  
+listApproved = (msg) ->  
   return unless validateConfiguration(msg)
   return unless validateRoom(msg)
 
-  sendApiRequest(msg, "#{apiEndpoint}/buffer", {}, 'get', (data) ->
+  sendApiRequest(msg, "#{apiEndpoint}", {approved: 'true'}, 'get', (data) ->
     linkList = ""
     links = data.links
 
-    msg.send("There are #{links.length} links in the buffer")
+    msg.send("There are #{links.length} links approved")
+
+    for link in links
+      linkList += "##{link.id} - #{link.title} #{link.url}\n"
+
+    msg.send(linkList)
+  )
+
+listPending = (msg) ->  
+  return unless validateConfiguration(msg)
+  return unless validateRoom(msg)
+
+  sendApiRequest(msg, "#{apiEndpoint}", {approved: 'false'}, 'get', (data) ->
+    linkList = ""
+    links = data.links
+
+    msg.send("There are #{links.length} links pending")
 
     for link in links
       linkList += "##{link.id} - #{link.title} #{link.url}\n"
@@ -188,4 +205,5 @@ module.exports = (robot) ->
   robot.hear /^!approve ([0-9]+)$/i, approveLink
   robot.hear /^!del(ete)? ([0-9]+)$/i, deleteLink
   robot.hear /^!show ([0-9]+)$/i, showLink
-  robot.hear /^!buffer$/, showBuffer
+  robot.hear /^!approved$/, listApproved
+  robot.hear /^!pending$/, listPending
